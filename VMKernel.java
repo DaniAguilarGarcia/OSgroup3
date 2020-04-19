@@ -23,6 +23,10 @@ public class VMKernel extends UserKernel {
      */
     public void initialize(String[] args) {
     	super.initialize(args);
+    	
+    	coreMap = new Page[Machine.processor().getNumPhysPages()];
+		tlbManager = new TLBManager();
+		memoryManager = new ClockPagingManager();
     }
 
     /**
@@ -43,15 +47,40 @@ public class VMKernel extends UserKernel {
      * Terminate this kernel. Never returns.
      */
     public void terminate() {
-    	super.terminate();
-    }
+		Lib.debug(dbgVM, "VM terminate");
+
+		getSwapper().close();
+		
+		Lib.debug(dbgVM, "Paging: page faults " + VMProcess.numPageFaults);
+		
+		super.terminate();
+	}
+
+	public static TranslationEntry getPageEntry(PageItem item) {
+		Integer ppn = invertedPageTable.get(item);
+		if (ppn == null)
+			return null;
+		Page result = coreMap[ppn];
+		if (result == null || !result.entry.valid)
+			return null;
+		return result.entry;
+	}
+	
+	public static SwapFile getSwapper() {
+		if (swapFile == null)
+			swapFile = new SwapFile();
+		return swapFile;
+	}
 
     // dummy variables to make javac smarter
     private static VMProcess dummy1 = null;
 
     private static final char dbgVM = 'v';
     
-    static Hashtable<PageItem, Integer> invertedPageTable;
-    static TLBManager tlbManager;
-    static Page coreMap;
+    protected static Hashtable<PageItem, Integer> invertedPageTable = new Hashtable<PageItem, Integer>();
+    protected static Page[] coreMap;
+    protected static TLBManager tlbManager;
+    protected static MemoryManager memoryManager;
+	protected static SwapFile swapFile;
+    
 }

@@ -1,5 +1,4 @@
 package nachos.vm;
-
 import nachos.machine.TranslationEntry;
 
 public class SwapPage extends Page {
@@ -9,5 +8,4 @@ public class SwapPage extends Page {
 		super(item, entry);
 		this.frameNo = frameNo;
 	}
-
 }

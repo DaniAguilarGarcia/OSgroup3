@@ -10,7 +10,5 @@ public class Page {
 		this.item = item;
 		this.entry = entry;
 	}
-	
-	
 
 }
